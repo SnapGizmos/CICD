@@ -1,0 +1,23 @@
+        {
+            "apiVersion": "v1",
+            "kind": "ImageStream",
+            "metadata": {
+                "name": "busybox"
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "annotations": {
+                            "description": "The Docker Busybox image",
+                            "tags": "nexus"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "busybox:latest"
+                        },
+                        "importPolicy": {},
+                        "name": "latest"
+                    }
+                ]
+            }
+        }

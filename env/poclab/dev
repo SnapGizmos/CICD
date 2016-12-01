@@ -1,0 +1,2 @@
+APPLICATION_DOMAIN=gogs-poclab.h.svc.tite.lan
+DATABASE_SERVICE_NAME=mysql

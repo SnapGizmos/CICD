@@ -1,0 +1,57 @@
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "labels": {
+                    "app": "gogs",
+                    "group": "cicd",
+                    "job": "backup-gogs",
+                    "template": "cicd"
+                },
+                "name": "backup-gogs"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "command": [
+                            "/bin/bash",
+                            "/tmp/backup.sh"
+                        ],
+                        "env": [
+                            {
+                                "name": "GOGS_PASSWORD",
+                                "value": "password"
+                            }
+                        ],
+                        "image": "docker.io/openshiftdemos/oc",
+                        "name": "oc",
+                        "resources": {
+                            "limits": {
+                                "memory": "128Mi"
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/tmp/",
+                                "name": "script-volume"
+                            }
+                        ]
+                    }
+                ],
+                "restartPolicy": "Never",
+                "volumes": [
+                    {
+                        "configMap": {
+                            "items": [
+                                {
+                                    "key": "backup.sh",
+                                    "path": "backup.sh"
+                                }
+                            ],
+                            "name": "backup-restore"
+                        },
+                        "name": "script-volume"
+                    }
+                ]
+            }
+        }

@@ -1,0 +1,66 @@
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "labels": {
+                    "app": "gogs",
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "install-gogs"
+            },
+            "spec": {
+                "paralellism": 1,
+                "completions": 1,
+                "template": {
+		    "metadata": {
+                    	"name": "install-gogs"
+		    },
+		    "spec": {
+			"containers": [
+			    {
+				"command": [
+				    "/usr/bin/bash",
+				    "/tmp/installgogs.sh"
+				],
+				"env": [
+				    {
+					"name": "GOGS_PASSWORD",
+					"value": "password"
+				    }
+				],
+				"image": "docker.io/openshiftdemos/oc",
+				"name": "install-gogs",
+				"resources": {
+				    "limits": {
+					"memory": "128Mi"
+				    }
+				},
+				"volumeMounts": [
+				    {
+					"mountPath": "/tmp/",
+					"name": "script-volume"
+				    }
+				]
+			    }
+			],
+			"restartPolicy": "Never",
+			"volumes": [
+			    {
+				"configMap": {
+				    "items": [
+					{
+					    "key": "installgogs.sh",
+					    "path": "installgogs.sh"
+					}
+				    ],
+				    "name": "installgogs.sh"
+				},
+				"name": "script-volume"
+			    }
+			]
+		    }
+		},
+                "restartPolicy": "Never"
+            }
+        }

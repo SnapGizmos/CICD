@@ -1,0 +1,8 @@
+{
+    "kind": "roleBinding",
+    "name": "GogsAnyUID",
+    "namespace": "hammer",
+    "referencesGlobalRole": true,
+    "roleName": "privileged",
+    "userNames": ["gogs"]
+}

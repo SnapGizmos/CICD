@@ -1,0 +1,23 @@
+        {
+            "apiVersion": "v1",
+            "kind": "ImageStream",
+            "metadata": {
+                "name": "postgres"
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "annotations": {
+                            "description": "The DockerHub Postgres image",
+                            "tags": "nexus"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "postgres:latest"
+                        },
+                        "importPolicy": {},
+                        "name": "latest"
+                    }
+                ]
+            }
+        }
