@@ -33,7 +33,8 @@ mysqldump -h $MYSQL_SERVICE_HOST -u root --password=$MYSQL_PASSWORD --all-databa
 echo "Backed up file: "
 ls -al $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT
 
-#echo " ###### let's give it a shot! "
+echo " ###### let's give it a shot! "
+gdrive push -piped -no-prompt -force -destination $BACKUP_REMOTE_PATH $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT
 #cd $BACKUP_STOR
 #zcat $DEST_PATH/$DBSERVICE_NAME-$STAMP.sql.gz | gdrive push -piped -force -destination $BACKUP_REMOTE_PATH $DBSERVICE_NAME.$BKP_EXT
 

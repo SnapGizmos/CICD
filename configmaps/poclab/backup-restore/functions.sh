@@ -32,3 +32,19 @@ function wait_service_pods {
 	echo "-- End function wait_service_pods "
 }
 
+function self_jobruns {
+	oc describe pod $HOSTNAME | grep job-name 
+	raw=$(oc describe pod $HOSTNAME | grep job-name )
+	if [[ $raw =~ .*,.* ]]
+	then
+		echo "ShooooT!@"
+		raw=$(echo $raw | awk -F ',' '{{ print $2 }}'|tr -d '[:space:]')
+		job=$(echo $raw | awk -F '=' '{{ print $2 }}'|tr -d '[:space:]')
+	else
+		job=$(echo $raw | awk -F '=' '{{ print $2 }}'|tr -d '[:space:]')
+	fi;
+	echo "WE are in JOB $job "
+	nruns=$(oc get pods -l job-name=$job | grep -v ^NAME | wc -l)
+	echo "which is run $nruns "
+	return 0;
+}

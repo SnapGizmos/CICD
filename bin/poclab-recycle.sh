@@ -10,14 +10,7 @@ if [ -z "$prj" ]; then
 	oc new-project $NS --display-name="$NS_LONG"
 	echo "ok";
 
-	#echo "Project $NS_LONG exists. Deleting: ";
-	#oc delete project $NS;
-	#while [ ! -z "$(oc get project $NS -o name 2>/dev/null)" ]; do
-		#echo "Waitting ... ";
-		#sleep 10;
-	#done;
-	#echo "ok";
-	##bin/delete-persistence.sh
+	bin/create-persistence.sh $NS "$NS_LONG"
 fi;
 
 echo "Loading environment for $NS_LONG ";

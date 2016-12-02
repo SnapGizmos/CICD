@@ -6,16 +6,16 @@ echo ${BACKUP_LOCAL:=/data/local}
 echo ${BACKUP_REMOTE_PATH:=/SnapGizmos/Backups/}
 source /data/scripts/functions.sh
 
-#if [ -z "$SERVICE_NAME" ]; then
-#	echo "Missing mandatory parameter SERVICE_NAME ";
-#	exit -1;
-#fi;
+if [ -z "$SERVICE_NAME" ]; then
+	echo "Missing mandatory parameter SERVICE_NAME ";
+	exit -1;
+fi;
 
 echo " ###### Loading $SERVICE_NAME Environment "
 eval $(oc env dc/$SERVICE_NAME --list | grep -v \\#)
 STAMP=$(date +%Y%m%d%H%M)
-DEST_PATH=$BACKUP_STOR/$DBSERVICE_NAME/$STAMP
-BKP_EXT=sql.gz
+DEST_PATH=$BACKUP_STOR/$SERVICE_NAME/$STAMP
+BKP_EXT=tgz
 env
 
 if [ -d $BACKUP_STOR/.gd ]; then
@@ -34,15 +34,15 @@ if [ ! -z $DEST_PATH ]; then
 fi;
 
 for f in "$BACKUP_FOLDERS" ; do
-	echo tar -C $BACKUP_LOCAL czf $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT $f
-	tar -C $BACKUP_LOCAL czf $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT $f
+	echo tar -C $BACKUP_LOCAL czf $DEST_PATH/$SERVICE_NAME-$STAMP.$BKP_EXT $f
+	tar -C $BACKUP_LOCAL -czf $DEST_PATH/$SERVICE_NAME-$STAMP.$BKP_EXT $f
 done;
 
 echo "Backed up file: "
-ls -al $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT
+ls -al $DEST_PATH/$SERVICE_NAME-$STAMP.$BKP_EXT
 
 #echo " ###### let's give it a shot! "
 #cd $BACKUP_STOR
-#zcat $DEST_PATH/$DBSERVICE_NAME-$STAMP.sql.gz | gdrive push -piped -force -destination $BACKUP_REMOTE_PATH $DBSERVICE_NAME.$BKP_EXT
+#zcat $DEST_PATH/$SERVICE_NAME-$STAMP.sql.gz | gdrive push -piped -force -destination $BACKUP_REMOTE_PATH $SERVICE_NAME.$BKP_EXT
 
 

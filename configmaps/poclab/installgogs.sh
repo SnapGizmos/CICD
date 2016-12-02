@@ -7,15 +7,6 @@ GOGSROUTE=$(oc get route gogs -o template --template='{{.spec.host}}')
 JENKINSSVC=$(oc get svc jenkins -o template --template='{{.spec.clusterIP}}')
 DBSERVICE_NAME=mysql
 
-job=$(oc describe pod $HOSTNAME | grep job-name | awk -F '=' '{{ print $2 }}'|tr -d '[:space:]')
-echo "WE are in JOB $job "
-nruns=$(oc get pods -l job-name=$job | grep -v ^NAME | wc -l)
-echo "which is run $nruns "
-if [ $nruns -ge 10 ]; then
-	echo "GIVING UP, it's been $nruns tries ... declaring PHONY success ";
-	exit 0;
-fi;
-
 # Use the oc client to get the postgres and jenkins variables into the current shell
 eval $(oc env dc/$DBSERVICE_NAME --list | grep -v \\#)
 #eval $(oc env dc/jenkins --list | grep -v \\#)

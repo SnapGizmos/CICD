@@ -20,8 +20,8 @@
 			"containers": [
 			    {
 				"command": [
-				    "sleep",
-				    "3000"
+				    "/bin/bash",
+				    "/data/scripts/backup.sh"
 				],
 				"env": [
 				    {

@@ -21,7 +21,7 @@
 			    {
 				"command": [
 				    "/bin/bash",
-				    "/data/scripts/restore.sh"
+				    "/data/scripts/restore-mysql.sh"
 				],
 				"env": [
 				    {
