@@ -3,23 +3,21 @@
 NS="poclab"
 NS_LONG="POC Lab"
 
+bin/cleanup.sh $NS "$NS_LONG"
 prj=$(oc get project/$NS -o name 2>/dev/null)
-if [ ! -z "$prj" ]; then
-	echo "Project $NS_LONG exists. Deleting: ";
-	oc delete project $NS;
-	while [ ! -z "$(oc get project $NS -o name 2>/dev/null)" ]; do
-		echo "Waitting ... ";
-		sleep 10;
-	done;
+if [ -z "$prj" ]; then
+	echo "Creating new project $NS_LONG ... ";
+	oc new-project $NS --display-name="$NS_LONG"
 	echo "ok";
-	echo "$NS_LONG : Inspecting volumes ";
-	for pv in $(oc get pv -n $NS -o name | awk -F '/' '{{ print $2 }}'); do
-		echo "$NS_LONG : Inspecting $pv .. ";
-		if [ ! -z "$(grep -r $pv pv/$NS/)" ]; then
-			oc delete pv $pv;
-		fi;
-		echo "$NS_LONG : $pv .. ok ";
-	done;
+
+	#echo "Project $NS_LONG exists. Deleting: ";
+	#oc delete project $NS;
+	#while [ ! -z "$(oc get project $NS -o name 2>/dev/null)" ]; do
+		#echo "Waitting ... ";
+		#sleep 10;
+	#done;
+	#echo "ok";
+	##bin/delete-persistence.sh
 fi;
 
 echo "Loading environment for $NS_LONG ";
@@ -27,35 +25,13 @@ set -o allexport
 source env/$NS/dev
 set +o allexport
 
-echo "Creating new project $NS_LONG ... ";
-oc new-project $NS --display-name="$NS_LONG"
-echo "ok";
-
 for prv in $(find secrets/$NS -maxdepth 1 -type f -name '*.json' -o -name '*.yml' -o -name '*.yaml' ); do
 	echo "$NS_LONG : Creating Secret $prv ... ";
 	oc create -f $prv;
 	echo "ok";
 done;
 
-PARAMS=""
-for cfg in $(find configmaps/$NS/* -maxdepth 0 -type d ); do
-	echo "$NS_LONG : Creating ConfigMap from folder ($cfg) with $PARAMS ";
-	for cfg2 in $(find $cfg/. -maxdepth 1 -type f -name '*.sh'); do
-		#echo "Running with $cfg2 and $PARAMS"
-		PARAMS="$PARAMS --from-file=$cfg2"
-	done;
-	if [ ! -z "$PARAMS" ]; then
-		#echo basename: $(basename $cfg)
-		echo oc create configmap $(basename $cfg) $PARAMS;
-	fi;
-	echo "ok";
-done;
-
-for cfg in $(find configmaps/$NS -maxdepth 1 -type f -name '*.sh'); do
-	echo "$NS_LONG : Creating ConfigMap $cfg ... ";
-	oc create configmap $(basename $cfg) --from-file=$cfg;
-	echo "ok";
-done;
+bin/configmap.sh $NS "$NS_LONG"
 
 for pv in $(find pv/$NS -maxdepth 1 -type f -name '*.json' -o -name '*.yml' -o -name '*.yaml' ); do
 	echo "$NS_LONG : Creating PV $pv ... ";

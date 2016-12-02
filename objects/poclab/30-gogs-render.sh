@@ -5,12 +5,12 @@ for p in $(oc process --parameters -n poclab gogs-mysql-template | grep -oh "^\w
 	str="echo \$$p";
 	v=$(eval $str);
 	if [ ! -z "$v" ]; then
-		if [ ! -z "$PARAMS" ]; then PARAMS="$PARAMS,"; fi;
+		if [ ! -z "$PARAMS" ]; then PARAMS="$PARAMS "; fi;
 		PARAMS="$PARAMS$p=$v";
 		echo "PARAMS: $PARAMS ";
 	fi;
 done;
 
-echo oc process -n poclab -v $PARAMS gogs-mysql-template 
+echo oc process -n poclab gogs-mysql-template $PARAMS
 oc process -n poclab -v $PARAMS gogs-mysql-template | oc create -f -
 

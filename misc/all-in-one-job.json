@@ -3,18 +3,18 @@
             "kind": "Job",
             "metadata": {
                 "labels": {
-                    "app": "gogs",
+                    "app": "restore-gogs-mysql",
                     "group": "cicd",
                     "template": "cicd"
                 },
-                "name": "install-gogs"
+                "name": "restore-mysql-gogs"
             },
             "spec": {
                 "paralellism": 0,
                 "completions": 1,
                 "template": {
 		    "metadata": {
-                    	"name": "install-gogs-tmpl"
+                    	"name": "raise-gogs-tmpl"
 		    },
 		    "spec": {
 			"containers": [
@@ -29,8 +29,8 @@
 					"value": "password"
 				    },
 				    {
-					"name": "JOB_FAIL_DEPENDENCY",
-					"value": "restore-mysql-gogs restore-gog-config"
+					"name": "JOB_FAILED_DEPENDENCY",
+					"value": "app=restore-mysql"
 				    }
 				],
 				"image": "docker.io/openshiftdemos/oc",
@@ -44,6 +44,39 @@
 				    {
 					"mountPath": "/tmp/",
 					"name": "script-volume"
+				    }
+				]
+			    },
+			    {
+				"command": [
+				    "/bin/bash",
+				    "/data/scripts/restore.sh"
+				],
+				"env": [
+				    {
+					"name": "MYSQL_PASSWORD",
+					"value": "IjoX0du6wOuLX3HO"
+				    }
+				],
+				"image": "snapgizmos/backups",
+				"name": "restore-mysql",
+				"resources": {
+				    "limits": {
+					"memory": "128Mi"
+				    }
+				},
+				"volumeMounts": [
+				    {
+					"mountPath": "/data/scripts/",
+					"name": "scripts-volume"
+				    },
+				    {
+					"mountPath": "/data/secrets/",
+					"name": "secrets-volume"
+				    },
+				    {
+					"mountPath": "/data/remote/",
+					"name": "backup-volume"
 				    }
 				]
 			    }
@@ -61,6 +94,24 @@
 				    "name": "installgogs.sh"
 				},
 				"name": "script-volume"
+			    },
+			    {
+				"configMap": {
+				    "name": "backup-restore"
+				},
+				"name": "scripts-volume"
+			    },
+			    {
+				"secret": {
+				    "secretName": "google-drive"
+				},
+				"name": "secrets-volume"
+			    },
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "backup-data-pvc"
+				},
+				"name": "backup-volume"
 			    }
 			]
 		    }

@@ -1,0 +1,80 @@
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "labels": {
+                    "app": "mysql",
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "backup-mysql"
+            },
+            "spec": {
+                "paralellism": 1,
+                "completions": 1,
+                "template": {
+		    "metadata": {
+                    	"name": "backup-mysql"
+		    },
+		    "spec": {
+			"containers": [
+			    {
+				"command": [
+				    "sleep",
+				    "3000"
+				],
+				"env": [
+				    {
+					"name": "MYSQL_PASSWORD",
+					"value": "IjoX0du6wOuLX3HO"
+				    }
+				],
+				"image": "snapgizmos/backups",
+				"name": "backup-mysql",
+				"resources": {
+				    "limits": {
+					"memory": "128Mi"
+				    }
+				},
+				"volumeMounts": [
+				    {
+					"mountPath": "/data/scripts/",
+					"name": "scripts-volume"
+				    },
+				    {
+					"mountPath": "/data/secrets/",
+					"name": "secrets-volume"
+				    },
+				    {
+					"mountPath": "/data/remote/",
+					"name": "backup-volume"
+				    }
+				]
+			    }
+			],
+			"restartPolicy": "Never",
+			"volumes": [
+			    {
+				"configMap": {
+				    "name": "backup-restore"
+				},
+				"name": "scripts-volume"
+			    },
+			    {
+				"secret": {
+				    "secretName": "google-drive"
+				},
+				"name": "secrets-volume"
+			    },
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "backup-data-pvc"
+				},
+				"name": "backup-volume"
+			    }
+			]
+		    }
+		},
+                "restartPolicy": "Never"
+            }
+        }

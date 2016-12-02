@@ -1,0 +1,84 @@
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "labels": {
+                    "app": "mysql",
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "backup-gogs"
+            },
+            "spec": {
+                "paralellism": 1,
+                "completions": 1,
+                "template": {
+		    "metadata": {
+                    	"name": "backup-gogs"
+		    },
+		    "spec": {
+			"containers": [
+			    {
+				"command": [
+				    "/bin/bash",
+				    "/data/scripts/backup-mysql.sh"
+				],
+				"image": "snapgizmos/backups",
+				"name": "backup-mysql",
+				"resources": {
+				    "limits": {
+					"memory": "128Mi"
+				    }
+				},
+				"volumeMounts": [
+				    {
+					"mountPath": "/data/scripts/",
+					"name": "scripts-volume"
+				    },
+				    {
+					"mountPath": "/data/secrets/",
+					"name": "secrets-volume"
+				    },
+				    {
+					"mountPath": "/data/remote/",
+					"name": "backup-volume"
+				    },
+				    {
+					"mountPath": "/data/local/",
+					"name": "data-volume"
+				    }
+				]
+			    }
+			],
+			"restartPolicy": "Never",
+			"volumes": [
+			    {
+				"configMap": {
+				    "name": "backup-restore"
+				},
+				"name": "scripts-volume"
+			    },
+			    {
+				"secret": {
+				    "secretName": "google-drive"
+				},
+				"name": "secrets-volume"
+			    },
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "backup-data-pvc"
+				},
+				"name": "backup-volume"
+			    },
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "gogs-data-pvc"
+				},
+				"name": "data-volume"
+			    }
+			]
+		    }
+		},
+                "restartPolicy": "Never"
+            }
+        }

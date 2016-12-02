@@ -101,7 +101,8 @@ objects:
         serviceAccount: gogs
         serviceAccountName: gogs
         volumes:
-        - emptyDir: {}
+        - persistentVolumeClaim: 
+            claimName: "gogs-data-pvc"
           name: gogs-volume
     triggers:
     - type: ConfigChange
@@ -116,6 +117,17 @@ objects:
       requests:
         storage: "10Gi"
     volumeName: "${DATABASE_VOLUME_NAME}"
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata: 
+    name: gogs-data-pvc
+  spec:
+    accessModes:
+      - "ReadWriteOnce"
+    resources:
+      requests:
+        storage: "10Gi"
+    volumeName: "${GOGS_VOLUME_NAME}"
 - apiVersion: v1
   kind: DeploymentConfig
   metadata: 
@@ -204,3 +216,7 @@ parameters:
     displayName: "Database Persistent Volume Name"
     required: false
     value: "dev-data-01"
+  - name: "GOGS_VOLUME_NAME"
+    displayName: "GOGS Persistent Volume Name"
+    required: false
+    value: "dev-data-02"

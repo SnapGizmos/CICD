@@ -6,11 +6,6 @@ echo ${BACKUP_LOCAL:=/data/local}
 echo ${BACKUP_REMOTE_PATH:=/SnapGizmos/Backups/}
 source /data/scripts/functions.sh
 
-#if [ -z "$SERVICE_NAME" ]; then
-#	echo "Missing mandatory parameter SERVICE_NAME ";
-#	exit -1;
-#fi;
-
 echo " ###### Loading $SERVICE_NAME Environment "
 eval $(oc env dc/$SERVICE_NAME --list | grep -v \\#)
 STAMP=$(date +%Y%m%d%H%M)
@@ -24,8 +19,8 @@ if [ -d $BACKUP_STOR/.gd ]; then
 	cp $BACKUP_SECRETS/.gd_credentials.json $BACKUP_STOR/.gd/credentials.json
 fi;
 
-echo " ###### Checking backup folders .. "
-echo $BACKUP_FOLDERS
+echo " ###### Checking service status .. "
+wait_service $DBSERVICE_NAME
 
 echo " ###### Running backup "
 if [ ! -z $DEST_PATH ]; then
@@ -33,10 +28,7 @@ if [ ! -z $DEST_PATH ]; then
 	mkdir -p $DEST_PATH;
 fi;
 
-for f in "$BACKUP_FOLDERS" ; do
-	echo tar -C $BACKUP_LOCAL czf $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT $f
-	tar -C $BACKUP_LOCAL czf $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT $f
-done;
+mysqldump -h $MYSQL_SERVICE_HOST -u root --password=$MYSQL_PASSWORD --all-databases | gzip -9 -c > $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT
 
 echo "Backed up file: "
 ls -al $DEST_PATH/$DBSERVICE_NAME-$STAMP.$BKP_EXT
