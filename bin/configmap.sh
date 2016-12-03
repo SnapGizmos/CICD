@@ -33,7 +33,10 @@ for cfg in $(find configmaps/$NS/* -maxdepth 0 -type d ); do
 	echo "ok";
 done;
 
-for cfg in $(find configmaps/$NS -maxdepth 1 -type f -name '*.sh'); do
+echo "TEST: confimaps/$NS/\..*"
+find configmaps/$NS -maxdepth 1 -type f | grep -v "confimaps/$NS/\\\..*"
+
+for cfg in $(find configmaps/$NS -maxdepth 1 -type f | grep -v "confimaps/$NS/\..*"); do
 	echo "$NS_LONG : Creating ConfigMap $cfg ... ";
 	if [ ! -z "$(oc get configmap/$(basename $cfg) -o name 2>/dev/null)" ]; then
 		oc delete configmap/$(basename $cfg)

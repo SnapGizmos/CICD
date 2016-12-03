@@ -53,6 +53,7 @@ fi;
 echo "Killing pod, so it will redeploy with the restored data "
 SELECTOR=$(oc describe service $SERVICE_NAME | grep "^Selector" | awk -F ':' '{{ print $2 }}'|tr -d '[:space:]')
 echo "Selector $SELECTOR "
+echo "PLEASE RESTART Pod $(oc get pods -l $SELECTOR -o name) MANUALLY ";
 oc delete $(oc get pods -l $SELECTOR -o name)
 
 echo " ########################################## "

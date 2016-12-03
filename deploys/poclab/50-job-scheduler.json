@@ -30,12 +30,42 @@
 		    "image": "snapgizmos/backups:0.2.1", 
 		    "name": "restore-cron", 
 		    "resources": { 
-		       "limits": { 
-		          "memory": "128Mi" 
-		       } 
-		    } 
+		        "limits": { 
+		            "memory": "128Mi" 
+		        } 
+		    },
+		    "volumeMounts": [
+		    	{
+			   "mountPath": "/var/spool/cron",
+			   "name": "schedule-volume"
+		    	},
+			{
+			   "mountPath": "/data/backups/",
+			   "name": "scripts-volume"
+			}
+		    ]
 		 }
 	      ], 
+	      "volumes": [
+		 {
+		    "configMap": {
+		       "items": [
+			  {
+			     "key": "root",
+			     "path": "root"
+			  }
+		       ],
+		       "name": "root"
+		    },
+		    "name": "schedule-volume"
+		 },
+		 {
+		    "configMap": {
+			"name": "backup-restore"
+		    },
+		    "name": "scripts-volume" 
+		 }
+	      ],
 	      "serviceAccountName": "gogs", 
 	      "serviceAccount": "gogs"
 	    }
