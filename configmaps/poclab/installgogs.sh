@@ -11,68 +11,8 @@ DBSERVICE_NAME=mysql
 eval $(oc env dc/$DBSERVICE_NAME --list | grep -v \\#)
 #eval $(oc env dc/jenkins --list | grep -v \\#)
 
-# postgres has a readiness probe, so checking if there is at least one
-# endpoint means postgres is alive and ready, so we can then attempt to install gogs
-# we're willing to wait 60 seconds for it, otherwise something is wrong.
-x=1
-oc get ep $DBSERVICE_NAME -o yaml | grep "\- addresses:"
-while [ ! $? -eq 0 ]
-do
-      	sleep 10
-      	x=$(( $x + 1 ))
-	
-      	if [ $x -gt 100 ]
-      	then
-	    	exit 255
-      	fi
-	
-      	oc get ep $DBSERVICE_NAME -o yaml | grep "\- addresses:"
-done
-
-# now we wait for gogs to be ready in the same way
-x=1
-oc get ep gogs -o yaml | grep "\- addresses:"
-while [ ! $? -eq 0 ]
-do
-      	sleep 10
-      	x=$(( $x + 1 ))
-	
-      	if [ $x -gt 100 ]
-      	then
-	    	exit 255
-      	fi
-	
-      	oc get ep gogs -o yaml | grep "\- addresses:"
-done
-
-if [ ! -z "$JOB_FAIL_DEPENDENCY" ]; then
-	#oc describe pods -l job-name=$JOB_FAIL_DEPENDENCY;
-	inloop='true'
-	while [ $inloop = 'true' ]; do
-		for job in "$JOB_FAIL_DEPENCENCY"; do
-			status=$(oc describe pods -l job-name=$job | grep ^Status | awk -F ':' '{{print $2}}' | tr -d '[:space:]')
-			if [ -z "$status" ]; then
-				echo "Dependant job ($job) does not exist, can't continue. ";
-				exit -1;
-			fi;
-
-			case "$status" in 
-				Succeeded)
-					echo "Hello there, everything went well ... job $JOB_FAIL_DEPENDENCY finalized with status $status " 
-					exit 0
-					;;
-				Running)
-					echo "Still working, I suggest sleeping for a few ... " 
-					sleep 10
-					;;
-				*)
-					echo "Unrecognized status : $status , letting it go .. " 
-					inloop='false'
-					;;
-			esac
-		done;
-	done;
-fi;
+wait_service $DBSERVICE_NAME
+wait_service "gogs"
 
 # we might catch the router before it's been updated, so wait just a touch
 # more
@@ -93,7 +33,7 @@ RETURN=$(curl -o /dev/null -sL --post302 -w "%{http_code}" http://$GOGSSVC:3000/
 --form run_user=git \
 --form domain=localhost \
 --form ssh_port=22 \
---form http_port=80 \
+--form http_port=3000 \
 --form app_url=http://${GOGSROUTE}/ \
 --form log_root_path=/data/gogs/log \
 --form admin_name=gogs \
@@ -112,6 +52,9 @@ then
 fi
 
 sleep 10
+
+echo "Sorry. Not importing any repo from anywere ... "
+exit 0
 
 # import github repository
 cat <<EOF > /tmp/data.json

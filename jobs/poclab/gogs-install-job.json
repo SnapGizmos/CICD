@@ -27,10 +27,6 @@
 				    {
 					"name": "GOGS_PASSWORD",
 					"value": "password"
-				    },
-				    {
-					"name": "JOB_FAIL_DEPENDENCY",
-					"value": "restore-mysql-gogs restore-gogs"
 				    }
 				],
 				"image": "docker.io/openshiftdemos/oc",

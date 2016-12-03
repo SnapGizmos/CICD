@@ -1,0 +1,44 @@
+{
+   "apiVersion": "v1",
+   "kind": "DeploymentConfig",
+   "metadata": {
+       "labels": {
+           "app": "restore-gogs"
+       },
+       "name": "job-scheduler"
+   },
+   "spec": 
+   {
+       "replicas": 1,
+       "selector": {
+           "app": "job-schedule",
+           "deploymentconfig": "job-scheduler"
+       },
+       "template": 
+       {
+           "metadata": { 
+	      "labels": {
+                 "app": "job-schedule",
+                 "deploymentconfig": "job-scheduler"
+              },
+              "name": "job-scheduler"
+           },
+           "spec": { 
+	      "containers": [ 
+	         {   
+		    "command": ["/usr/local/bin/run-crond.sh","-n","s","-x","load"], 
+		    "image": "snapgizmos/backups:0.2.1", 
+		    "name": "restore-cron", 
+		    "resources": { 
+		       "limits": { 
+		          "memory": "128Mi" 
+		       } 
+		    } 
+		 }
+	      ], 
+	      "serviceAccountName": "gogs", 
+	      "serviceAccount": "gogs"
+	    }
+       }
+   }
+}

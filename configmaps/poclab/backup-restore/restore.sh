@@ -3,13 +3,19 @@
 echo ${BACKUP_SECRETS:=/data/secrets}
 echo ${BACKUP_STOR:=/data/remote}
 echo ${BACKUP_LOCAL:=/data/local}
-echo ${BACKUP_REMOTE_PATH:=/SnapGizmos/Backups/}
+echo ${BACKUP_REMOTE_PATH:=SnapGizmos/Backups/}
+echo ${BACKUP_NAMESPACE:=$(oc describe pod $HOSTNAME|grep ^Namespace|awk -F ':' '{{print $2}}'|tr -d '[:space:]')}
 source /data/scripts/functions.sh
 
 STAMP=$(date +%Y%m%d%H%M)
 SRC_PATH=$BACKUP_STOR/$SERVICE_NAME
-BKP_EXT=sql.gz
+BKP_EXT=tgz
 env
+
+if [ -z "$SERVICE_NAME" ]; then
+	echo "Missing required field SERVICE_NAME ";
+	exit -1;
+fi;
 
 eval $(oc env dc/$SERVICE_NAME --list | grep -v \\#)
 
@@ -19,8 +25,8 @@ if [ -z "$DESTINATION_PATH" ]; then
 fi;
 
 echo " ###### Checking service status .. "
-wait_service $DBSERVICE_NAME
-wait_service_pods $DBSERVICE_NAME
+wait_service $SERVICE_NAME
+wait_service_pods $SERVICE_NAME
 
 if [ ! -d $BACKUP_STOR/.gd ]; then
 	echo "First time remote backup configuration"
@@ -36,9 +42,18 @@ if [ -f "$BACKUP_FILE" ]; then
 	echo tar -C $DESTINATION_PATH -xzf $BACKUP_FILE
 	tar -C $DESTINATION_PATH -xzf $BACKUP_FILE
 else
-	echo "Backup no found under $DEST_PATH, let's recover from remote ! "
+	echo "Backup no found under $SRC_PATH, let's recover from remote ! at $BACKUP_STOR "
 	cd $BACKUP_STOR
-	gdrive ls
-	gdrive pull -piped -force -destination $BACKUP_REMOTE_PATH $DBSERVICE_NAME.$BKP_EXT | gunzip 
+	gdrive list $BACKUP_REMOTE_PATH
+	echo "Going with $BACKUP_REMOTE_PATH/$BACKUP_NAMESPACE-$SERVICE_NAME.$BKP_EXT on "$(pwd)
+	echo gdrive pull -piped $BACKUP_REMOTE_PATH/$BACKUP_NAMESPACE-$SERVICE_NAME.$BKP_EXT \| tar -C $DESTINATION_PATH -xz
+	gdrive pull -ignore-checksum=false -no-prompt -verbose -piped $BACKUP_REMOTE_PATH/$BACKUP_NAMESPACE-$SERVICE_NAME.$BKP_EXT | tar -C $DESTINATION_PATH -xz
 fi;
 
+echo "Killing pod, so it will redeploy with the restored data "
+SELECTOR=$(oc describe service $SERVICE_NAME | grep "^Selector" | awk -F ':' '{{ print $2 }}'|tr -d '[:space:]')
+echo "Selector $SELECTOR "
+oc delete $(oc get pods -l $SELECTOR -o name)
+
+echo " ########################################## "
+echo " ############ END of Script ############### "

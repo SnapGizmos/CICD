@@ -1,0 +1,139 @@
+        {
+            "apiVersion": "batch/v1",
+            "kind": "Job",
+            "metadata": {
+                "labels": {
+                    "app": "backup-gogs",
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "gogs-backup"
+            },
+            "spec": {
+                "paralellism": 0,
+                "completions": 1,
+                "template": {
+		    "metadata": {
+                    	"name": "raise-gogs-tmpl"
+		    },
+		    "spec": {
+			"containers": [
+			    {
+				"command": [
+				    "/bin/bash",
+				    "/data/scripts/backup-mysql.sh"
+				],
+				"env": [
+				    {
+					"name": "SERVICE_NAME",
+					"value": "mysql"
+				    }
+				],
+				"image": "snapgizmos/backups",
+				"name": "backup-db",
+				"resources": {
+				    "limits": {
+					"memory": "128Mi"
+				    }
+				},
+				"volumeMounts": [
+				    {
+					"mountPath": "/data/scripts/",
+					"name": "scripts-volume"
+				    },
+				    {
+					"mountPath": "/data/secrets/",
+					"name": "secrets-volume"
+				    },
+				    {
+					"mountPath": "/data/remote/",
+					"name": "backup-volume"
+				    }
+				]
+			    },
+			    {
+				"command": [
+				    "/bin/bash",
+				    "/data/scripts/backup.sh"
+				],
+				"env": [
+				    {
+					"name": "SERVICE_NAME",
+					"value": "gogs"
+				    },
+				    {
+					"name": "BACKUP_FOLDERS",
+					"value": "gogs/conf git gogs/data"
+				    }
+				],
+				"image": "snapgizmos/backups",
+				"name": "backup-front",
+				"resources": {
+				    "limits": {
+					"memory": "128Mi"
+				    }
+				},
+				"volumeMounts": [
+				    {
+					"mountPath": "/data/scripts/",
+					"name": "scripts-volume"
+				    },
+				    {
+					"mountPath": "/data/secrets/",
+					"name": "secrets-volume"
+				    },
+				    {
+					"mountPath": "/data/local/",
+					"name": "gogs-volume"
+				    },
+				    {
+					"mountPath": "/data/remote/",
+					"name": "backup-volume"
+				    }
+				]
+			    }
+			],
+			"restartPolicy": "Never",
+			"volumes": [
+			    {
+				"configMap": {
+				    "items": [
+					{
+					    "key": "installgogs.sh",
+					    "path": "installgogs.sh"
+					}
+				    ],
+				    "name": "installgogs.sh"
+				},
+				"name": "script-volume"
+			    },
+			    {
+				"configMap": {
+				    "name": "backup-restore"
+				},
+				"name": "scripts-volume"
+			    },
+			    {
+				"secret": {
+				    "secretName": "google-drive"
+				},
+				"name": "secrets-volume"
+			    },
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "gogs-data-pvc"
+				},
+				"name": "gogs-volume"
+			    },
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "backup-data-pvc"
+				},
+				"name": "backup-volume"
+			    }
+			]
+		    }
+		},
+                "restartPolicy": "Never"
+            }
+        }

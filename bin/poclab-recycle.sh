@@ -26,13 +26,7 @@ done;
 
 bin/configmap.sh $NS "$NS_LONG"
 
-for pv in $(find pv/$NS -maxdepth 1 -type f -name '*.json' -o -name '*.yml' -o -name '*.yaml' ); do
-	echo "$NS_LONG : Creating PV $pv ... ";
-	oc create -f $pv;
-	echo "ok";
-done;
-
-for fl in $(find objects/$NS/. -maxdepth 1 -type f -name '*.json' -o -name '*.yml' -o -name '*.yaml' -o -name '*.sh' | sort); do
+for fl in $(find deploys/$NS/. -maxdepth 1 -type f -name '*.json' -o -name '*.yml' -o -name '*.yaml' -o -name '*.sh' | sort); do
 	if [ -z $(echo $fl | grep '.sh$') ]; then
 		echo "$NS_LONG : Creating $fl ... ";
 		oc create -f $fl;
