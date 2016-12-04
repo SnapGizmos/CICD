@@ -1,6 +1,6 @@
 node('maven') {
    sh "env"
-   openshiftCreateResources(json: 'openshift/template.json', namespace: 'dev') {
+   openshiftCreateResource(json: 'openshift/template.json', namespace: 'dev') {
    }
 
    // define commands
@@ -32,7 +32,7 @@ node('maven') {
    } 
 
    stage 'Deploy DEV'
-   openshiftCreateResources(json: 'openshift/template.json', namespace: 'dev') {
+   openshiftCreateResource(json: 'openshift/template.json', namespace: 'dev') {
    }
    sh "rm -rf oc-build && mkdir -p oc-build/deployments"
    sh "cp target/openshift-tasks.war oc-build/deployments/ROOT.war"
