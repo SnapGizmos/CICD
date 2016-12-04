@@ -24,6 +24,7 @@ node('maven') {
    )
 
    stage 'Push to Nexus'
+   sh "cat pom.xml"
    sh "${mvnCmd} deploy -DskipTests=true"
 
    stage 'Deploy DEV'
