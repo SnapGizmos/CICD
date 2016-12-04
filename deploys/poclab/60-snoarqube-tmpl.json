@@ -1,0 +1,212 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {},
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "service.openshift.io/infrastructure": "true"
+                },
+                "labels": {
+                    "app": "sonarqube",
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "sonarqube"
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "sonarqube",
+                        "port": 9000,
+                        "protocol": "TCP",
+                        "targetPort": 9000
+                    }
+                ],
+                "selector": {
+                    "app": "sonarqube",
+                    "deploymentconfig": "sonarqube"
+                },
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Route",
+            "metadata": {
+                "annotations": {
+                    "description": "Route for SonarQube's http service."
+                },
+                "labels": {
+                    "app": "sonarqube",
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "sonarqube"
+            },
+            "spec": {
+                "to": {
+                    "kind": "Service",
+                    "name": "sonarqube"
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "ImageStream",
+            "metadata": {
+                "labels": {
+                    "app": "sonarqube",
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "sonarqube"
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "annotations": {
+                            "description": "The SonarQube Docker image",
+                            "tags": "sonarqube",
+                            "version": "6.0"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "library/sonarqube:latest"
+                        },
+                        "importPolicy": {},
+                        "name": "6.0"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "DeploymentConfig",
+            "metadata": {
+                "labels": {
+                    "app": "sonarqube",
+                    "deploymentconfig": "sonarqube",
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "sonarqube"
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {
+                    "app": "sonarqube",
+                    "deploymentconfig": "sonarqube"
+                },
+                "strategy": {
+                    "resources": {},
+                    "rollingParams": {
+                        "intervalSeconds": 1,
+                        "maxSurge": "25%",
+                        "maxUnavailable": "25%",
+                        "timeoutSeconds": 600,
+                        "updatePeriodSeconds": 1
+                    },
+                    "type": "Rolling"
+                },
+                "template": {
+                    "metadata": {
+                        "annotations": {
+                            "openshift.io/container.sonarqube.image.entrypoint": "[\"./bin/run.sh\"]"
+                        },
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "sonarqube",
+                            "deploymentconfig": "sonarqube"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "SONARQUBE_JDBC_USERNAME",
+                                        "value": "sonar"
+				    },
+                                    {
+                                        "name": "SONARQUBE_JDBC_PASSWORD",
+                                        "value": "sonar"
+				    },
+                                    {
+                                        "name": "SONARQUBE_JDBC_URL",
+                                        "value": "jdbc:mysql://mysql/sonar?useUnicode=true&characterEncoding=utf8"
+				    }
+				],
+                                "image": " ",
+                                "imagePullPolicy": "IfNotPresent",
+                                "livenessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": 9000
+                                    },
+                                    "initialDelaySeconds": 60,
+                                    "periodSeconds": 20,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 5
+                                },
+                                "name": "sonarqube",
+                                "ports": [
+                                    {
+                                        "containerPort": 9000,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": 9000
+                                    },
+                                    "initialDelaySeconds": 60,
+                                    "periodSeconds": 20,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 5
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "memory": "1536Mi"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Always",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                },
+                "test": false,
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "sonarqube"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "sonarqube:6.0"
+                            }
+                        },
+                        "type": "ImageChange"
+                    }
+                ]
+            },
+            "status": {}
+        }
+    ]
+}

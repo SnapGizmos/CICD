@@ -66,8 +66,8 @@
 		    "name": "scripts-volume" 
 		 }
 	      ],
-	      "serviceAccountName": "gogs", 
-	      "serviceAccount": "gogs"
+	      "serviceAccountName": "bkpadm", 
+	      "serviceAccount": "bkpadm"
 	    }
        }
    }

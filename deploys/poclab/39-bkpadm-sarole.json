@@ -1,0 +1,21 @@
+        {
+            "apiVersion": "v1",
+            "groupNames": null,
+            "kind": "RoleBinding",
+            "metadata": {
+                "labels": {
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "bkpadm_edit"
+            },
+            "roleRef": {
+                "name": "edit"
+            },
+            "subjects": [
+                {
+                    "kind": "ServiceAccount",
+                    "name": "bkpadm"
+                }
+            ]
+        }

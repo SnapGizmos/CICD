@@ -1,0 +1,58 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {},
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "BuildConfig",
+            "metadata": {
+                "labels": {
+                    "app": "cicd-pipeline",
+                    "group": "cicd",
+                    "name": "cicd-pipeline",
+                    "template": "cicd"
+                },
+                "name": "tasks-pipeline"
+            },
+            "spec": {
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "https://github.com/SnapGizmos/CICD/"
+                    }
+                },
+                "strategy": {
+                    "type": "JenkinsPipeline",
+                    "jenkinsPipelineStrategy": {
+                            "jenkinsfilePath": "openshift/pipeline.jenkins"
+                    }
+                }
+            },
+            "status": {
+                "lastVersion": 0
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "groupNames": null,
+            "kind": "RoleBinding",
+            "metadata": {
+                "labels": {
+                    "group": "cicd",
+                    "template": "cicd"
+                },
+                "name": "default_edit"
+            },
+            "roleRef": {
+                "name": "edit"
+            },
+            "subjects": [
+                {
+                    "kind": "ServiceAccount",
+                    "name": "default"
+                }
+            ]
+        }
+    ]
+}

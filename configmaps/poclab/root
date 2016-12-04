@@ -1,0 +1,5 @@
+SHELL=/bin/bash
+PATH=$PATH:/usr/bin:/usr/sbin:/usr/local/bin
+
+0 6,12,18,0 * * * /bin/bash /data/backups/run-backup.sh gogs-backup
+
