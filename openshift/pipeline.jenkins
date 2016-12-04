@@ -1,11 +1,6 @@
 node('maven') {
    sh "env"
-
-   configFileProvider([configFile(fileId: '00045d94-5f1a-4647-96d2-1172f422be0a', targetLocation: 'deploy', variable: 'NEXUS_SETTINGS')]) {
-       	// some block
-	sh "echo dentro settings "
-	sh "echo tenemos settings: $NEXUS_SETTINGS "
-   }
+   openshiftCreateResources(json: 'openshift/template.json', namespace: 'dev')
 
    // define commands
    def ocCmd = "oc --token=`cat /var/run/secrets/kubernetes.io/serviceaccount/token` --server=https://osmaster.mgt.tite.lan:8443 --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt"
