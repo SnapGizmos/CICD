@@ -1,8 +1,10 @@
 {
-    "kind": "List",
+    "kind": "Template",
     "apiVersion": "v1",
-    "metadata": {},
-    "items": [
+    "metadata": {
+	"name": "sonarqube-persistent-template"
+    },
+    "objects": [
         {
             "apiVersion": "v1",
             "kind": "Service",
@@ -141,6 +143,16 @@
                                         "value": "jdbc:mysql://mysql/sonar?useUnicode=true&characterEncoding=utf8"
 				    }
 				],
+				"volumeMounts": [
+				    {
+					"mountPath": "/opt/sonarqube/data",
+					"name": "sonar-data-vol"
+				    },
+				    {
+					"mountPath": "/opt/sonarqube/extensions",
+					"name": "sonar-ext-vol"
+				    }
+				],
                                 "image": " ",
                                 "imagePullPolicy": "IfNotPresent",
                                 "livenessProbe": {
@@ -180,6 +192,20 @@
                                 "terminationMessagePath": "/dev/termination-log"
                             }
                         ],
+			"volumes": [
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "sonar-data-pvc"
+				},
+				"name": "sonar-data-vol"
+			    },
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "sonar-extensions-pvc"
+				},
+				"name": "sonar-ext-vol"
+			    }
+			],
                         "dnsPolicy": "ClusterFirst",
                         "restartPolicy": "Always",
                         "securityContext": {},
@@ -207,6 +233,50 @@
                 ]
             },
             "status": {}
-        }
+        },
+	{
+	    "apiVersion": "v1",
+	    "kind": "PersistentVolumeClaim",
+	    "metadata": {
+	       "name": "sonar-data-pvc"
+	    },
+	    "spec": {
+		"accessModes": ["ReadWriteMany"],
+		"resources": {
+		    "requests": {
+		    	"storage": "10Gi"
+		    }
+		},
+		"volumeName": "${SONAR_DATA_VOLUME_NAME}"
+	    }
+	},
+	{
+	    "apiVersion": "v1",
+	    "kind": "PersistentVolumeClaim",
+	    "metadata": {
+	       "name": "sonar-extensions-pvc"
+	    },
+	    "spec": {
+		"accessModes": ["ReadWriteMany"],
+		"resources": {
+		    "requests": {
+		    	"storage": "10Gi"
+		    }
+		},
+		"volumeName": "${SONAR_EXTENSIONS_VOLUME_NAME}"
+	    }
+	}
+    ],
+    "parameters": [
+	{
+	   "name": "SONAR_DATA_VOLUME_NAME",
+	   "description": "Name of the persistent RWM volume to use for the SonarQube DATA",
+	   "required": true
+	},
+	{
+	   "name": "SONAR_EXTENSIONS_VOLUME_NAME",
+	   "description": "Name of the persistent RWM volume to use for the SonarQube EXTENSIONS",
+	   "required": true
+	}
     ]
 }

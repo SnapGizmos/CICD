@@ -3,18 +3,18 @@
             "kind": "Job",
             "metadata": {
                 "labels": {
-                    "app": "restore-gogs-mysql",
+                    "app": "restore-sonarqube",
                     "group": "cicd",
                     "template": "cicd"
                 },
-                "name": "gogs-restore"
+                "name": "sonarqube-restore"
             },
             "spec": {
                 "paralellism": 0,
                 "completions": 1,
                 "template": {
 		    "metadata": {
-                    	"name": "raistore-gogs-tmpl"
+                    	"name": "raistore-sonarqube-tmpl"
 		    },
 		    "spec": {
 			"containers": [
@@ -26,7 +26,7 @@
 				"env": [
 				    {
 					"name": "SERVICE_NAME",
-					"value": "gogs"
+					"value": "sonarqube-data"
 				    },
 				    {
 					"name": "DESTINATION_PATH",
@@ -34,7 +34,7 @@
 				    }
 				],
 				"image": "snapgizmos/backups",
-				"name": "restore-gogs",
+				"name": "restore-sonarqube-data",
 				"resources": {
 				    "limits": {
 					"memory": "128Mi"
@@ -51,7 +51,48 @@
 				    },
 				    {
 					"mountPath": "/data/local/",
-					"name": "gogs-volume"
+					"name": "sonar-data-volume"
+				    },
+				    {
+					"mountPath": "/data/remote/",
+					"name": "backup-volume"
+				    }
+				]
+			    },
+			    {
+				"command": [
+				    "/bin/bash",
+				    "/data/scripts/restore.sh"
+				],
+				"env": [
+				    {
+					"name": "SERVICE_NAME",
+					"value": "sonarqube-extension"
+				    },
+				    {
+					"name": "DESTINATION_PATH",
+					"value": "/data/local/"
+				    }
+				],
+				"image": "snapgizmos/backups",
+				"name": "restore-sonarqube-extensions",
+				"resources": {
+				    "limits": {
+					"memory": "128Mi"
+				    }
+				},
+				"volumeMounts": [
+				    {
+					"mountPath": "/data/scripts/",
+					"name": "scripts-volume"
+				    },
+				    {
+					"mountPath": "/data/secrets/",
+					"name": "secrets-volume"
+				    },
+				    {
+					"mountPath": "/data/local/",
+					"name": "sonar-ext-volume"
 				    },
 				    {
 					"mountPath": "/data/remote/",
@@ -76,9 +117,15 @@
 			    },
 			    {
 				"persistentVolumeClaim": {
-				    "claimName": "gogs-data-pvc"
+				    "claimName": "sonar-data-pvc"
 				},
-				"name": "gogs-volume"
+				"name": "sonar-data-volume"
+			    },
+			    {
+				"persistentVolumeClaim": {
+				    "claimName": "sonar-extensions-pvc"
+				},
+				"name": "sonar-ext-volume"
 			    },
 			    {
 				"persistentVolumeClaim": {

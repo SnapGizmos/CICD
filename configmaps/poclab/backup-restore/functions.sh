@@ -2,6 +2,10 @@
 
 function wait_service {
 	SERVICE_NAME=$1
+	if [ -z "$(oc get service/$SERVICE_NAME -o name 2>/dev/null)" ]; then
+		echo "Service $SERVICE_NAME does not exist, so nothing to do ... ";
+		return 0;
+	fi;
 	# this db has a readiness probe, so checking if there is at least one
 	# endpoint means it is alive and ready, so we can then attempt to install gogs
 	# we're willing to wait 60 seconds for it, otherwise something is wrong.
@@ -23,6 +27,10 @@ function wait_service {
 
 function wait_service_pods {
 	SERVICE_NAME=$1
+	if [ -z "$(oc get service/$SERVICE_NAME -o name 2>/dev/null)" ]; then
+		echo "Service $SERVICE_NAME does not exist, so nothing to do ... ";
+		return 0;
+	fi;
 	# this db has a readiness probe, so checking if there is at least one
 	# endpoint means it is alive and ready, so we can then attempt to install gogs
 	# we're willing to wait 60 seconds for it, otherwise something is wrong.
@@ -47,4 +55,12 @@ function self_jobruns {
 	nruns=$(oc get pods -l job-name=$job | grep -v ^NAME | wc -l)
 	echo "which is run $nruns "
 	return 0;
+}
+
+function test_active_service {
+	SERVICE_NAME=$1;
+	if [ -z "$(oc get service/$SERVICE_NAME -o name 2>/dev/null)" ]; then
+		echo "Service $SERVICE_NAME does not exist ... ";
+		eval "\$1=''"
+	fi;
 }

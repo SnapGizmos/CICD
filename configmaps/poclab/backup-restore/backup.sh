@@ -34,6 +34,9 @@ if [ ! -z $DEST_PATH ]; then
 	mkdir -p $DEST_PATH;
 fi;
 
+if [ -z "$BACKUP_FOLDERS" ]; then
+	BACKUP_FOLDERS=".";
+fi;
 for f in "$BACKUP_FOLDERS" ; do
 	echo tar -C $BACKUP_LOCAL czf $DEST_PATH/$SERVICE_NAME-$STAMP.$BKP_EXT $f
 	tar -C $BACKUP_LOCAL -czf $DEST_PATH/$SERVICE_NAME-$STAMP.$BKP_EXT $f

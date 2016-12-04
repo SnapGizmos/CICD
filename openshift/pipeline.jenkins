@@ -24,6 +24,10 @@ node('maven') {
    )
 
    stage 'Push to Nexus'
+   configFileProvider([configFile(fileId: '00045d94-5f1a-4647-96d2-1172f422be0a', targetLocation: 'deploy', variable: 'nexus-settings')]) {
+       	// some block
+	sh "echo tenemos settings: $nexus-settings "
+   }
    sh "cat pom.xml"
    sh "${mvnCmd} deploy -DskipTests=true"
 

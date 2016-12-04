@@ -3,18 +3,18 @@
             "kind": "Job",
             "metadata": {
                 "labels": {
-                    "app": "restore-gogs-mysql",
+                    "app": "restore-sonarqube",
                     "group": "cicd",
                     "template": "cicd"
                 },
-                "name": "gogs-restore"
+                "name": "restore-sonarqube"
             },
             "spec": {
                 "paralellism": 0,
                 "completions": 1,
                 "template": {
 		    "metadata": {
-                    	"name": "raistore-gogs-tmpl"
+                    	"name": "raistore-sonarqube-tmpl"
 		    },
 		    "spec": {
 			"containers": [
@@ -26,15 +26,15 @@
 				"env": [
 				    {
 					"name": "SERVICE_NAME",
-					"value": "gogs"
+					"value": "sonarqube-data"
 				    },
 				    {
 					"name": "DESTINATION_PATH",
-					"value": "/data/local/"
+					"value": "/data"
 				    }
 				],
 				"image": "snapgizmos/backups",
-				"name": "restore-gogs",
+				"name": "restore-sonarqube-data",
 				"resources": {
 				    "limits": {
 					"memory": "128Mi"
@@ -51,7 +51,7 @@
 				    },
 				    {
 					"mountPath": "/data/local/",
-					"name": "gogs-volume"
+					"name": "data-volume"
 				    },
 				    {
 					"mountPath": "/data/remote/",
