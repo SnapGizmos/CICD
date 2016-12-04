@@ -1,6 +1,7 @@
 node('maven') {
    sh "env"
-   openshiftCreateResources(json: 'openshift/template.json', namespace: 'dev')
+   openshiftCreateResources(json: 'openshift/template.json', namespace: 'dev') {
+   }
 
    // define commands
    def ocCmd = "oc --token=`cat /var/run/secrets/kubernetes.io/serviceaccount/token` --server=https://osmaster.mgt.tite.lan:8443 --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt"
