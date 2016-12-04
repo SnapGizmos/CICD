@@ -1,6 +1,6 @@
 node('maven') {
    sh "env"
-   openshiftCreateResource(json: 'openshift/template.json', namespace: 'dev') {
+   openshiftCreateResource('json': 'openshift/template.json', 'namespace': 'dev') {
    }
 
    // define commands
