@@ -30,13 +30,14 @@ node('maven') {
    )
 
    stage 'Push to Nexus'
-   configFileProvider([configFile(fileId: '00045d94-5f1a-4647-96d2-1172f422be0a', targetLocation: 'deploy', variable: 'NEXUS_SETTINGS')]) {
+   configFileProvider([configFile(fileId: '00045d94-5f1a-4647-96d2-1172f422be0a', targetLocation: 'settings.xml', variable: 'NEXUS_SETTINGS')]) {
        	// some block
 	sh "echo dentro settings "
 	sh "echo tenemos settings: $NEXUS_SETTINGS "
+   	sh "${mvnCmd} -s $NEXUS_SETTINGS deploy -DskipTests=true"
+   } else {
+   	sh "${mvnCmd} deploy -DskipTests=true"
    }
-   sh "cat pom.xml"
-   sh "${mvnCmd} deploy -DskipTests=true"
 
    stage 'Deploy DEV'
    sh "rm -rf oc-build && mkdir -p oc-build/deployments"
