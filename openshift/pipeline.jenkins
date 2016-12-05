@@ -30,8 +30,7 @@ node('maven') {
    } 
 
    stage 'Deploy DEV'
-   //openshiftCreateResource(json: 'openshift/template.json', namespace: 'dev') {
-   //}
+   sh "bin/render-template.sh dev"
    sh "rm -rf oc-build && mkdir -p oc-build/deployments"
    sh "cp target/openshift-tasks.war oc-build/deployments/ROOT.war"
    // clean up. keep the image stream
