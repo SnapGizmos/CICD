@@ -1,7 +1,5 @@
 node('maven') {
    sh "env"
-   openshiftCreateResource([json: 'openshift/template.json', namespace: 'dev']) {
-   }
 
    // define commands
    def ocCmd = "oc --token=`cat /var/run/secrets/kubernetes.io/serviceaccount/token` --server=https://osmaster.mgt.tite.lan:8443 --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt"
@@ -32,8 +30,8 @@ node('maven') {
    } 
 
    stage 'Deploy DEV'
-   openshiftCreateResource(json: 'openshift/template.json', namespace: 'dev') {
-   }
+   //openshiftCreateResource(json: 'openshift/template.json', namespace: 'dev') {
+   //}
    sh "rm -rf oc-build && mkdir -p oc-build/deployments"
    sh "cp target/openshift-tasks.war oc-build/deployments/ROOT.war"
    // clean up. keep the image stream
