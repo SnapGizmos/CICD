@@ -30,7 +30,9 @@ node('maven') {
    } 
 
    stage 'Deploy DEV'
+   sh "alias oc=${ocCmd}"
    sh "bin/render-template.sh dev"
+   sh "alias oc=oc"
    sh "rm -rf oc-build && mkdir -p oc-build/deployments"
    sh "cp target/openshift-tasks.war oc-build/deployments/ROOT.war"
    // clean up. keep the image stream
